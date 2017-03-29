@@ -34,75 +34,71 @@ int main(int argc, char* argv[])
         {
                 double gl(0.003), gr(0.027);
                 Mat H0(para, gl, gr);
-                int Wsize(H0.groundstate().size());
 
-                MPI_Bcast(&Wsize, 1, MPI_INT,
-                        0, MPI_COMM_WORLD);
-                //cout<<Wsize<<endl;
-                
-                
-                //cout<<"the 0:"<<endl;
-                //cout<<H0.groundstate()<<endl;
-                MPI_Bcast(&H0.groundstate()(0), Wsize, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
-                ofstream overlap("./result/overlap");
-                overlap<<gl<<"\t"<<H0.groundstate().adjoint()*H0.groundstate()
-                        <<"\t"<<H0.groundstate().adjoint()*H0.MatH()
-                                *H0.groundstate()/para.ParticleNo()<<endl;
+                ofstream spectra("./result/spectra");
+
+                spectra<<gl<<"\t";
+                for(int i=0; i<5; ++i)
+                        spectra<<H0.Eigenvalues()(i)<<"\t";
+
+                spectra<<endl;
+
                 for(int i=0; i<everygroup; ++i)
                 {
                         gl=0.003+0.0005*(i+1);
                         gr=0.03-gl;
                         Mat H(para, gl, gr);
-                        overlap<<gl<<"\t"<<abs(H0.groundstate().adjoint()*H.groundstate())
-                                <<"\t"<<(H0.groundstate().adjoint()*H.MatH()
-                                *H0.groundstate())/para.ParticleNo()<<endl;
+
+                        spectra<<gl<<"\t";
+                        for(int i=0; i<5; ++i)
+                                spectra<<H.Eigenvalues()(i)<<"\t";
+
+                        spectra<<endl;
 
                 }
                 for(int id=1; id<numprocess; ++id)
                 {
                         VectorXd gl1(everygroup);
-                        VectorXd overlap1(everygroup);
-                        VectorXd energy1(everygroup);
+                        //VectorXd overlap1(everygroup);
+                        MatrixXd spectra1(everygroup,5);//here the 5 is for the number of eigenvalues we obtained.
                         
                         MPI_Recv(&gl1(0), everygroup, MPI_DOUBLE, id, id,
                                 MPI_COMM_WORLD, &status);
                         
                         //cout<<gl1<<endl;
 
-                        MPI_Recv(&overlap1(0), everygroup, MPI_LONG_DOUBLE, id,
-                                id+numprocess, MPI_COMM_WORLD, &status);
                         
-                        MPI_Recv(&energy1(0), everygroup, MPI_DOUBLE, id,
-                                id+2*numprocess, MPI_COMM_WORLD, &status);
+                        MPI_Recv(&spectra1(0,0), everygroup*5, MPI_DOUBLE, id,
+                                id+numprocess, MPI_COMM_WORLD, &status);
                         //cout<<"from 0:"<<endl;
                         //cout<<overlap1<<endl;
 
+
+
+                        
                         for(int i=0; i<everygroup;++i)
-                        overlap<<gl1(i)<<"\t"<<overlap1(i)<<"\t"<<energy1(i)<<endl;
+                        {
+                                spectra<<gl1(i)<<"\t";
+                                for(int j=0; j<5; ++j)
+                                        spectra<<spectra1(i,j)<<"\t";
+                                spectra<<endl;
+                        }
 
                         //delete gl1;
                         //delete energy1;
                         
                 }
-                overlap.close();
+                spectra.close();
 
         }
         else
         {
                 
-                int Wsize;
-                MPI_Bcast(&Wsize, 1, MPI_INT, 0, MPI_COMM_WORLD);
-                //cout<<Wsize<<endl;
-                //double* baseground=new double(Wsize);
-                VectorXd baseground(Wsize);
-                MPI_Bcast(&baseground(0), Wsize, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-                //cout<<"the 1:"<<endl;
-                //cout<<baseground<<endl;
+                
                 VectorXd gl(everygroup);
                 
-                VectorXd overlap(everygroup);
-                VectorXd energy(everygroup);
+                MatrixXd spectra(everygroup, 5);
 
 
                 for(int i=everygroup*myid; i<everygroup*(myid+1);++i)
@@ -112,9 +108,8 @@ int main(int argc, char* argv[])
                         gl((i-myid*everygroup))=0.003+0.0005*(i+1);
                         double gr=0.03-gl[i-myid*everygroup];
                         Mat H(para, gl[i-myid*everygroup], gr);
-                        overlap[i-myid*everygroup]=abs((baseground.adjoint()*H.groundstate()));
-                        energy(i-myid*everygroup)=baseground.adjoint()*H.MatH()*baseground;
-                        energy(i-myid*everygroup)/=para.ParticleNo();
+
+                        spectra.row(i-myid*everygroup)=H.Eigenvalues().transpose();
 
                         
                         
@@ -126,10 +121,8 @@ int main(int argc, char* argv[])
 
                 MPI_Send(&gl(0), everygroup, MPI_DOUBLE, 0, 
                         myid, MPI_COMM_WORLD);
-                MPI_Send(&overlap(0), everygroup, MPI_LONG_DOUBLE, 0, 
+                MPI_Send(&spectra(0,0), everygroup*5, MPI_DOUBLE, 0, 
                         myid+numprocess, MPI_COMM_WORLD);
-                MPI_Send(&energy(0), everygroup, MPI_DOUBLE, 0, 
-                        myid+2*numprocess, MPI_COMM_WORLD);
                 //cout<<myid+numprocess<<endl;
                 
 

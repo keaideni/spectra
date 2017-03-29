@@ -62,23 +62,23 @@ void Hamiltanian::kron(const Hamiltanian& HL, const Hamiltanian& HR, const doubl
 
         _System.kron(HL._System, HR._SysEye);
         OP systemp;
-        systemp.kron(HL.SysEye(), HR.System());
+        systemp.kron(HL._SysEye, HR._System);
         _System.add(systemp);
-        systemp.kron(HL.SysCR(), HR.SysCDagL());
+        systemp.kron(HL._SysCR, HR._SysCDagL);
         systemp.time(coup);
         _System.add(systemp);
-        systemp.kron(HL.SysCDagR(), HR.SysCL());
+        systemp.kron(HL._SysCDagR, HR._SysCL);
         systemp.time(coup);
         _System.add(systemp);
 
 
 
 
-        _SysEye.kron(HL.SysEye(), HR.SysEye());
-        _SysCR.kron(HL.SysEye(), HR.SysCR());
-        _SysCDagR.kron(HL.SysEye(), HR.SysCDagR());
-        _SysCL.kron(HL.SysCL(), HR.SysEye());
-        _SysCDagL.kron(HL.SysCDagL(), HR.SysEye());
+        _SysEye.kron(HL._SysEye, HR._SysEye);
+        _SysCR.kron(HL._SysEye, HR._SysCR);
+        _SysCDagR.kron(HL._SysEye, HR._SysCDagR);
+        _SysCL.kron(HL._SysCL, HR._SysEye);
+        _SysCDagL.kron(HL._SysCDagL, HR._SysEye);
 }
 
 

@@ -10,13 +10,15 @@ using namespace Spectra;
 class Mat
 {
 private:
-        MatrixXd _MatH;
-        VectorXd _groundstate;
+        //MatrixXd _MatH;
+        MatrixXd _state;
+        VectorXd _Eigenvalues;
 public:
         Mat(){};
         ~Mat(){};
-        MatrixXd MatH()const{return _MatH;};
-        VectorXd groundstate()const{return _groundstate;};
+        //MatrixXd MatH()const{return _MatH;};
+        VectorXd state()const{return _state;};
+        VectorXd Eigenvalues()const{return _Eigenvalues;};
 
 
 
@@ -50,17 +52,18 @@ public:
 
                 //_MatH.resize(rown, coln);
                 //Ham1.System().show();
-                _MatH=Ham1.System().QMat()->at(para.ParticleNo());
+                //_MatH=Ham1.System().QMat()->at(para.ParticleNo());
 
-                DenseSymMatProd<double> opmat(_MatH);
+                DenseSymMatProd<double> opmat(Ham1.System().QMat()->at(para.ParticleNo()));
 
                 SymEigsSolver<double, SMALLEST_ALGE, DenseSymMatProd<double>>
-                 eigs(&opmat, 1, 4);
+                 eigs(&opmat, 5, 10);
 
                 eigs.init();
                 eigs.compute();
 
-                _groundstate=eigs.eigenvectors(1);
+                _state=eigs.eigenvectors();
+                _Eigenvalues=eigs.eigenvalues();
         };
 };
 
