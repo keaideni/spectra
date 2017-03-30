@@ -26,6 +26,7 @@ public:
         {
                 Hamiltanian Qubit(qubit, para);
                 Hamiltanian Resonator(resonator, para);
+                //Qubit.show();Resonator.show();
 
                 Hamiltanian Ham1(Qubit), Ham2;
                 //Ham1.show();
@@ -38,8 +39,8 @@ public:
                                 Ham2.kron(Ham1, Qubit, gl);
                         else
                         {
-                                        Ham2.kron(Ham1, Resonator, gr);
-                                        //Ham2.show();
+                                Ham2.kron(Ham1, Resonator, gr);
+                                //Ham2.show();
                         }
                         Ham1=Ham2;
 
@@ -56,14 +57,19 @@ public:
 
                 DenseSymMatProd<double> opmat(Ham1.System().QMat()->at(para.ParticleNo()));
 
-                SymEigsSolver<double, SMALLEST_ALGE, DenseSymMatProd<double>>
-                 eigs(&opmat, 5, 10);
+                SymEigsSolver<double, SMALLEST_MAGN, DenseSymMatProd<double>>
+                 eigs(&opmat, 1, 2);
 
                 eigs.init();
                 eigs.compute();
 
                 _state=eigs.eigenvectors();
                 _Eigenvalues=eigs.eigenvalues();
+
+
+                /*SelfAdjointEigenSolver<MatrixXd> es(Ham1.System().QMat()->at(para.ParticleNo()));
+                _state=es.eigenvectors();
+                _Eigenvalues=es.eigenvalues();*/
         };
 };
 

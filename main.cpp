@@ -20,7 +20,7 @@ int main(int argc, char* argv[])
         inpara.close();
         //para.show();
 
-        MPI_Status status;
+        /*MPI_Status status;
 
         int myid, numprocess;
 
@@ -141,6 +141,12 @@ int main(int argc, char* argv[])
 
         
 
-        //com(para);
+        //com(para);*/
+
+        cout.precision(10);
+
+        Mat H1(para, 0.00, 0.03), H2(para, 0.03, 0.00);
+        cout<<H1.Eigenvalues()<<endl<<endl<<H2.Eigenvalues()<<endl;
+
         
 }

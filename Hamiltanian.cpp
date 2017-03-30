@@ -8,7 +8,8 @@ _SysEye(H.SysEye()),
 _SysCR(H.SysCR()),
 _SysCDagR(H.SysCDagR()),
 _SysCL(H.SysCL()),
-_SysCDagL(H.SysCDagL())
+_SysCDagL(H.SysCDagL()),
+_Edgepro(H._Edgepro)
 {}
 
 
@@ -64,6 +65,7 @@ void Hamiltanian::kron(const Hamiltanian& HL, const Hamiltanian& HR, const doubl
         OP systemp;
         systemp.kron(HL._SysEye, HR._System);
         _System.add(systemp);
+        
         systemp.kron(HL._SysCR, HR._SysCDagL);
         systemp.time(coup);
         _System.add(systemp);
@@ -71,7 +73,9 @@ void Hamiltanian::kron(const Hamiltanian& HL, const Hamiltanian& HR, const doubl
         systemp.time(coup);
         _System.add(systemp);
 
-
+        _Edgepro.kron(HL._SysCDagL, HR._SysCR);
+        systemp.kron(HL._SysCL, HR._SysCDagR);
+        _Edgepro.add(systemp);
 
 
         _SysEye.kron(HL._SysEye, HR._SysEye);
@@ -79,20 +83,16 @@ void Hamiltanian::kron(const Hamiltanian& HL, const Hamiltanian& HR, const doubl
         _SysCDagR.kron(HL._SysEye, HR._SysCDagR);
         _SysCL.kron(HL._SysCL, HR._SysEye);
         _SysCDagL.kron(HL._SysCDagL, HR._SysEye);
+
+
 }
 
 
 
 void Hamiltanian::final(const double& coup)
 {
-        OP systemp;
-        systemp.time(_SysCDagL, _SysCR);
-        systemp.time(coup);
-        _System.add(systemp);
-
-        systemp.time(_SysCL, _SysCDagR);
-        systemp.time(coup);
-        _System.add(systemp);
+        _Edgepro.time(coup);
+        _System.add(_Edgepro);
 }
 
 
@@ -117,4 +117,5 @@ void Hamiltanian::operator=(const Hamiltanian& H)
         _SysCDagR=H._SysCDagR;
         _SysCL=H._SysCL;
         _SysCDagL=H._SysCDagL;
+        _Edgepro=H._Edgepro;
 }

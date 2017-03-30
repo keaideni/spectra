@@ -71,7 +71,7 @@ public:
 
         void add(const OP& a);                 //for the operator +=, but don't need to copy anything.
 
-        void time(const OP& a, const OP& b);
+        void time(const OP& a, const OP& b);     //for the same site operation. This one has a problem.
 
         OP operator*(const OP& a);
 
